@@ -1,16 +1,15 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import helmet from 'helmet';
 
-import { healthCheckRouter } from '@/api/healthCheck/healthCheckRouter';
 import { logger } from '@/config/logger/index';
 import rateLimiter from '@/middleware/rateLimiter';
 import requestLogger from '@/middleware/requestLogger';
 import { env } from '@/utils/envConfig';
 
-import { authRouter } from './api/auth/auth.router';
 import { globalErrorHandler } from './middleware/errorHandler';
+import apiRouter from './router';
 
 const app: Express = express();
 
@@ -28,12 +27,7 @@ app.use(rateLimiter);
 // Request logging
 app.use(requestLogger);
 
-// Routes
-app.use('/health-check', healthCheckRouter);
-app.use('/api/auth', authRouter);
-app.get('/', (req: Request, res: Response) => {
-  res.send('Home');
-});
+app.use('/api', apiRouter);
 
 // not found
 app.use((_req, res) => {
