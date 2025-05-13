@@ -1,19 +1,36 @@
+import { connectDB } from '@/config/db';
 import { app, logger } from '@/server';
 import { env } from '@/utils/envConfig';
 
-const server = app.listen(env.PORT, () => {
-  const { NODE_ENV, HOST, PORT } = env;
-  logger.info(`Server (${NODE_ENV}) running on port http://${HOST}:${PORT}`);
-});
+async function startServer() {
+  try {
+    // Establish MongoDB connection
+    await connectDB();
 
-const onCloseSignal = () => {
-  logger.info('sigint received, shutting down');
-  server.close(() => {
-    logger.info('server closed');
-    process.exit();
-  });
-  setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
-};
+    // Start the server
+    const { NODE_ENV, HOST, PORT } = env;
+    const server = app.listen(PORT, () => {
+      logger.info(`Server (${NODE_ENV}) running on http://${HOST}:${PORT}`);
+    });
 
-process.on('SIGINT', onCloseSignal);
-process.on('SIGTERM', onCloseSignal);
+    // Graceful shutdown logic
+    const onCloseSignal = () => {
+      logger.info('SIGINT received, shutting down');
+      server.close(() => {
+        logger.info('Server closed');
+        process.exit();
+      });
+
+      // Force shutdown after 10s
+      setTimeout(() => process.exit(1), 10000).unref();
+    };
+
+    process.on('SIGINT', onCloseSignal);
+    process.on('SIGTERM', onCloseSignal);
+  } catch (error) {
+    logger.error('❌ Could not start server due to DB connection error', error);
+    process.exit(1);
+  }
+}
+
+startServer();
