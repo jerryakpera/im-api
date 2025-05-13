@@ -19,7 +19,6 @@ export const env = cleanEnv(process.env, {
   MONGO_USERNAME: str({ devDefault: testOnly('username') }),
   MONGO_PASSWORD: str({ devDefault: testOnly('password') }),
   MONGO_DB_NAME: str({ devDefault: testOnly('test-db') }),
-  MONGO_CLUSTER: str({ devDefault: testOnly('cluster0.mongodb.net') }),
 
   // MongoDB Connection Pool Options (optional, if used)
   DB_MAX_POOL_SIZE: num({ devDefault: testOnly(5) }),
